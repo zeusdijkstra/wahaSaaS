@@ -1,5 +1,7 @@
 # env
 .env
+.env.backup
+*.env.*
 
 # dependencies
 node_modules/
@@ -7,6 +9,9 @@ node_modules/
 # logs
 *.log
 logs/
+
+# WAHA sessions (contains auth data)
+sessions/
 
 # OS
 .DS_Store
