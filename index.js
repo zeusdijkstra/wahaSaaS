@@ -1,6 +1,6 @@
 import "dotenv/config";
-import app from "./server.js";
-import { startSession, stopSession, listSessions } from "./waha.js";
+import app from "./src/server/index.js";
+import { startSession, stopSession, listSessions } from "./src/waha/index.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
