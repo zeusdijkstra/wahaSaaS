@@ -3,6 +3,7 @@ import { sendMessage } from "./waha.js";
 import { getAIReply, clearHistory, getStats } from "./ai.js";
 
 const PRIVATE_ONLY = process.env.PRIVATE_ONLY !== "false";
+const GF_NUMBER = "621278424236@c.us";
 const RESET_COMMAND = "/reset";
 const RESET_REPLY = "Conversation reset. How can I help you?";
 const GROUP_CHAT_SUFFIX = "@g.us";
@@ -13,6 +14,7 @@ app.use(express.json());
 function shouldHandleMessage(event, msg) {
   if (event.event !== "message") return false;
   if (msg.fromMe) return false;
+  if (msg.chatId !== GF_NUMBER) return false;
   if (PRIVATE_ONLY && msg.chatId.endsWith(GROUP_CHAT_SUFFIX)) return false;
   if (!msg.body || typeof msg.body !== "string") return false;
   return true;

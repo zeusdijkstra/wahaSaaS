@@ -1,16 +1,13 @@
-import Anthropic from "@anthropic-ai/sdk";
+import Groq from "groq-sdk";
 
-const client = new Anthropic();
+const client = new Groq();
 
-// Store conversation history per chat ID
-// { "628123456789@c.us": [ {role, content}, ... ] }
 const conversations = new Map();
 
 const SYSTEM_PROMPT =
   process.env.BOT_SYSTEM_PROMPT ||
   "You are a helpful WhatsApp assistant. Keep replies short and friendly, like a real chat.";
 
-// Max messages to keep per conversation (keeps cost low)
 const MAX_HISTORY = 20;
 
 /**
@@ -40,14 +37,16 @@ export async function getAIReply(chatId, userMessage) {
     history.splice(0, history.length - MAX_HISTORY);
   }
 
-  const response = await client.messages.create({
-    model: "claude-sonnet-4-6",
-    max_tokens: 1024,
-    system: SYSTEM_PROMPT,
-    messages: history,
+  const response = await client.chat.completions.create({
+    model: "llama-3.1-8b-instant",
+    max_completion_tokens: 1024,
+    messages: [
+      { role: "system", content: SYSTEM_PROMPT },
+      ...history,
+    ],
   });
 
-  const reply = response.content[0].text;
+  const reply = response.choices[0].message.content;
 
   // Save assistant reply to history
   history.push({ role: "assistant", content: reply });
