@@ -1,6 +1,6 @@
 import "dotenv/config";
 import app from "./src/server/index.js";
-import { startSession, stopSession, listSessions } from "./src/waha/index.js";
+import { startSession } from "./src/waha/index.js";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -13,21 +13,6 @@ const STATUS_URL = `http://localhost:${PORT}/status`;
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-/**
- * Looks up an existing WAHA session by name.
- * Returns the session object if found, or null if not found or on error.
- *
- * @returns {Promise<object|null>}
- */
-async function findExistingSession() {
-  try {
-    const sessions = await listSessions(true);
-    return sessions.find((s) => s.name === process.env.WAHA_SESSION) ?? null;
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Starts the Express webhook server and logs the available endpoints.
@@ -60,39 +45,10 @@ function logReadyBanner() {
 // ---------------------------------------------------------------------------
 
 async function boot() {
-  await startWebhookServer();
-
-  const existing = await findExistingSession();
-
-  if (existing?.status === "WORKING") {
-    const name = existing.me?.pushName ?? "Unknown";
-    const id = existing.me?.id ?? "N/A";
-    console.log(`Session already running: ${name} (${id})`);
-    logReadyBanner();
-    return;
-  }
-
-  console.log("Connecting to WAHA...");
   await startSession(WEBHOOK_URL);
+  await startWebhookServer();
   logReadyBanner();
 }
-
-// ---------------------------------------------------------------------------
-// Shutdown
-// ---------------------------------------------------------------------------
-
-async function shutdown(signal) {
-  console.log(`Received ${signal}. Shutting down gracefully...`);
-  try {
-    await stopSession();
-  } catch (err) {
-    console.error(`Error stopping session: ${err.message}`);
-  }
-  process.exit(0);
-}
-
-process.on("SIGTERM", () => shutdown("SIGTERM"));
-process.on("SIGINT", () => shutdown("SIGINT"));
 
 // ---------------------------------------------------------------------------
 // Entry point

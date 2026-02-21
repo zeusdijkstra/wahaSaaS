@@ -23,16 +23,6 @@ export function createMessageHandler(config = {}) {
     return true;
   }
 
-  async function handleResetCommand(chatId) {
-    try {
-      cfg.clearHistory(chatId);
-      await cfg.sendMessage(chatId, cfg.resetReply);
-      console.log(`Conversation history cleared for chat: ${chatId}`);
-    } catch (err) {
-      console.error(`Failed to handle reset command for chat ${chatId}: ${err.message}`);
-    }
-  }
-
   async function handleIncomingMessage(chatId, text, { getAIReply }) {
     let reply;
 
@@ -51,10 +41,20 @@ export function createMessageHandler(config = {}) {
     }
   }
 
+  async function handleResetCommand(chatId) {
+    try {
+      await cfg.clearHistory(chatId);
+      console.log(`Conversation reset for ${chatId}`);
+      await cfg.sendMessage(chatId, cfg.resetReply);
+    } catch (err) {
+      console.error(`Failed to reset conversation for ${chatId}: ${err.message}`);
+    }
+  }
+
   return {
     shouldHandleMessage,
-    handleResetCommand,
     handleIncomingMessage,
+    handleResetCommand,
   };
 }
 
