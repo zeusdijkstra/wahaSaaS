@@ -111,6 +111,39 @@ export async function sendMessage(chatId, text) {
 }
 
 /**
+ * Marks messages in a chat as seen.
+ *
+ * @param {string} chatId - The WhatsApp chat ID to mark as seen.
+ */
+export async function sendSeen(chatId) {
+  if (!chatId) throw new Error("chatId is required");
+
+  try {
+    await wahaClient.post("/api/sendSeen", { session: SESSION, chatId });
+  } catch (err) {
+    throw new Error(`Failed to send seen: ${extractErrorMessage(err)}`);
+  }
+}
+
+/**
+ * Sends a reaction emoji to a message.
+ *
+ * @param {string} chatId     - The WhatsApp chat ID.
+ * @param {string} messageId  - The message ID to react to.
+ * @param {string} reaction   - The emoji reaction.
+ */
+export async function sendReaction(chatId, messageId, reaction) {
+  if (!chatId) throw new Error("chatId is required");
+  if (!messageId) throw new Error("messageId is required");
+
+  try {
+    await wahaClient.put("/api/reaction", { session: SESSION, chatId, messageId, reaction });
+  } catch (err) {
+    throw new Error(`Failed to send reaction: ${extractErrorMessage(err)}`);
+  }
+}
+
+/**
  * Updates the session config in WAHA.
  *
  * @param {string} webhookUrl - The URL WAHA will POST events to.

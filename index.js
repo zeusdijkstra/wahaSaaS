@@ -8,7 +8,6 @@ import { startSession } from "./src/waha/index.js";
 
 const PORT = process.env.WEBHOOK_PORT || 3001;
 const WEBHOOK_URL = `http://localhost:${PORT}/webhook`;
-const STATUS_URL = `http://localhost:${PORT}/status`;
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -24,7 +23,6 @@ function startWebhookServer() {
     app.listen(PORT, () => {
       console.log(`Webhook server listening on http://localhost:${PORT}`);
       console.log(`  Webhook endpoint : ${WEBHOOK_URL}`);
-      console.log(`  Status endpoint  : ${STATUS_URL}`);
       resolve();
     });
   });
@@ -34,6 +32,7 @@ function startWebhookServer() {
  * Logs a banner message indicating the bot is ready to receive messages.
  */
 function logReadyBanner() {
+  const STATUS_URL = `http://localhost:${PORT}/health`;
   console.log("-----------------------------------------------------------");
   console.log("  Bot is live. Waiting for WhatsApp messages...");
   console.log(`  Status: ${STATUS_URL}`);
@@ -45,7 +44,14 @@ function logReadyBanner() {
 // ---------------------------------------------------------------------------
 
 async function boot() {
-  await startSession(WEBHOOK_URL);
+  const skipWaha = process.env.SKIP_WAHA === "true";
+
+  if (!skipWaha) {
+    await startSession(WEBHOOK_URL);
+  } else {
+    console.log("  WAHA setup skipped (SKIP_WAHA=true)");
+  }
+
   await startWebhookServer();
   logReadyBanner();
 }

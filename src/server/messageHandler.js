@@ -1,5 +1,5 @@
 import { clearHistory as defaultClearHistory } from "../ai/index.js";
-import { sendMessage as defaultSendMessage } from "../waha/index.js";
+import { sendMessage as defaultSendMessage, sendSeen as defaultSendSeen, sendReaction as defaultSendReaction } from "../waha/index.js";
 
 const DEFAULT_CONFIG = {
   gfNumber: process.env.GF_NUMBER || "621278424236@c.us",
@@ -8,11 +8,23 @@ const DEFAULT_CONFIG = {
   privateOnly: process.env.PRIVATE_ONLY !== "false",
   groupChatSuffix: "@g.us",
   sendMessage: defaultSendMessage,
+  sendSeen: defaultSendSeen,
+  sendReaction: defaultSendReaction,
   clearHistory: defaultClearHistory,
+  reactionResponses: {
+    "❤️": "Cacaaaa 💕 Bara seneng banget lihat reaksi Caca!",
+    "😂": "Wkwk Caca ketawa, Bara jadi happy too! 😄",
+    "👍": "Nice! Thanks Caca! 👍",
+    "😍": "Caca ketebak aja nih 😂💖",
+  },
 };
 
 export function createMessageHandler(config = {}) {
   const cfg = { ...DEFAULT_CONFIG, ...config };
+
+  async function handleSeen(chatId) {
+    await cfg.sendSeen(chatId);
+  }
 
   function shouldHandleMessage(event, msg) {
     if (event.event !== "message") return false;
@@ -24,6 +36,13 @@ export function createMessageHandler(config = {}) {
   }
 
   async function handleIncomingMessage(chatId, text, { getAIReply }) {
+    try {
+      await handleSeen(chatId);
+    } catch (err) {
+      console.error(`Cannot reply to ${chatId}: failed to mark seen - ${err.message}`);
+      return;
+    }
+
     let reply;
 
     try {
@@ -43,7 +62,7 @@ export function createMessageHandler(config = {}) {
 
   async function handleResetCommand(chatId) {
     try {
-      await cfg.clearHistory(chatId);
+      cfg.clearHistory(chatId);
       console.log(`Conversation reset for ${chatId}`);
       await cfg.sendMessage(chatId, cfg.resetReply);
     } catch (err) {
@@ -51,10 +70,24 @@ export function createMessageHandler(config = {}) {
     }
   }
 
+  async function handleReaction(chatId, reactionText) {
+    const response = cfg.reactionResponses[reactionText];
+    if (!response) return;
+
+    try {
+      await cfg.sendMessage(chatId, response);
+      console.log(`Reaction response sent to ${chatId}: "${response}"`);
+    } catch (err) {
+      console.error(`Cannot send reaction response to ${chatId}: ${err.message}`);
+    }
+  }
+
   return {
     shouldHandleMessage,
     handleIncomingMessage,
     handleResetCommand,
+    handleSeen,
+    handleReaction,
   };
 }
 
