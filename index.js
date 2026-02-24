@@ -7,7 +7,8 @@ import { startSession } from "./src/waha/index.js";
 // ---------------------------------------------------------------------------
 
 const PORT = process.env.WEBHOOK_PORT || 3001;
-const WEBHOOK_URL = `http://localhost:${PORT}/webhook`;
+const WEBHOOK_HOST = process.env.WEBHOOK_HOST || "localhost";
+const WEBHOOK_URL = `http://${WEBHOOK_HOST}:${PORT}/webhook`;
 
 // ---------------------------------------------------------------------------
 // Helpers
