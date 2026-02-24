@@ -26,9 +26,10 @@ const mockGetAIReply = async (chatId, text) => {
 };
 
 const handler = createMessageHandler({
-  gfNumber: GF_NUMBER,
   sendMessage: mockSendMessage,
   clearHistory: mockClearHistory,
+}, {
+  gfNumber: GF_NUMBER,
 });
 
 console.log('=== Testing shouldHandleMessage() ===\n');

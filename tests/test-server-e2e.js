@@ -18,7 +18,6 @@ function createHandler() {
   };
   
   return createMessageHandler({
-    gfNumber: GF_NUMBER,
     sendSeen: async (chatId) => {
       sendSeenCalls.push({ chatId, timestamp: Date.now() });
       if (sendSeenShouldFail) {
@@ -29,6 +28,8 @@ function createHandler() {
       sendMessageCalls.push({ chatId, text, timestamp: Date.now() });
     },
     clearHistory: async (chatId) => {},
+  }, {
+    gfNumber: GF_NUMBER,
   });
 }
 
