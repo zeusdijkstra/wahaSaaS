@@ -46,9 +46,9 @@ app.post("/webhook", async (req, res) => {
 
   if (event.event === "message.reaction") {
     const payload = event.payload;
-    if (payload.fromMe === false && 
-        payload.from === process.env.GF_NUMBER && 
-        payload.reaction?.text) {
+    if (payload.fromMe === false &&
+      payload.from === process.env.GF_NUMBER &&
+      payload.reaction?.text) {
       await handleReaction(payload.from, payload.reaction.text);
     }
     return;

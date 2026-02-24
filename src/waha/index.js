@@ -5,8 +5,6 @@ import axios from "axios";
 // ---------------------------------------------------------------------------
 
 const SESSION = process.env.WAHA_SESSION || "default";
-const POLL_INTERVAL_MS = 3000;
-const DEFAULT_MAX_RETRIES = 60;
 
 const wahaClient = axios.create({
   baseURL: process.env.WAHA_URL,
@@ -50,43 +48,12 @@ function buildSessionConfig(webhookUrl) {
     webhooks: [
       {
         url: webhookUrl,
-        events: ["message", "session.status"],
+        events: ["message", "message.reaction", "session.status"],
       },
     ],
   };
 
-  // if (process.env.WAHA_PROXY_SERVER) {
-  //   config.proxy = {
-  //     server: process.env.WAHA_PROXY_SERVER,
-  //     username: process.env.WAHA_PROXY_USERNAME,
-  //     password: process.env.WAHA_PROXY_PASSWORD,
-  //   };
-  // }
-
   return config;
-}
-
-/**
- * Sleeps for the given number of milliseconds.
- */
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// ---------------------------------------------------------------------------
-// Internal session polling
-// ---------------------------------------------------------------------------
-
-/**
- * Fetches the current session object from the WAHA API.
- */
-async function fetchSessionStatus() {
-  try {
-    const res = await wahaClient.get(`/api/sessions/${SESSION}`);
-    return res.data;
-  } catch (err) {
-    throw new Error(`Failed to get session status: ${extractErrorMessage(err)}`);
-  }
 }
 
 // ---------------------------------------------------------------------------
@@ -161,7 +128,6 @@ export async function startSession(webhookUrl) {
     throw new Error(`Failed to update session config: ${extractErrorMessage(err)}`);
   }
 }
-
 
 /**
  * Returns the current session object.
